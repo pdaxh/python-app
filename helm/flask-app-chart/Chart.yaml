@@ -1,0 +1,17 @@
+apiVersion: v2
+name: flask-app
+description: A Helm chart for Flask API with Kubernetes deployment
+type: application
+version: 0.1.0
+appVersion: "v2"
+keywords:
+  - flask
+  - python
+  - api
+  - kubernetes
+home: https://github.com/PDAxh/python-app
+sources:
+  - https://github.com/PDAxh/python-app
+maintainers:
+  - name: danielaxhammar
+    email: your-email@example.com
