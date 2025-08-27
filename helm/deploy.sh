@@ -51,6 +51,17 @@ upgrade_chart() {
 # Function to uninstall the chart
 uninstall_chart() {
     echo "🗑️  Uninstalling Flask app..."
+    
+    # Auto-detect release name if not set
+    if [ -z "$RELEASE_NAME" ]; then
+        RELEASE_NAME=$(helm list -n $NAMESPACE --short | grep flask-app | head -1)
+        if [ -z "$RELEASE_NAME" ]; then
+            echo "❌ No Flask app release found in namespace $NAMESPACE"
+            return 1
+        fi
+        echo "🔍 Auto-detected release for uninstall: $RELEASE_NAME"
+    fi
+    
     helm uninstall $RELEASE_NAME --namespace $NAMESPACE
     
     echo "✅ Uninstallation complete!"
