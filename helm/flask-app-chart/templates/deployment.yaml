@@ -17,9 +17,9 @@ spec:
         {{- with .Values.pod.annotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        # ArgoCD health check optimization
-        argocd.argoproj.io/healthcheck-path: /health
-        argocd.argoproj.io/healthcheck-timeout: 5s
+        # ArgoCD health check optimization - temporarily disabled
+        # argocd.argoproj.io/healthcheck-path: /health
+        # argocd.argoproj.io/healthcheck-timeout: 5s
     spec:
       {{- with .Values.securityContext }}
       securityContext:

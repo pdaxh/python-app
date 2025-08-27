@@ -54,12 +54,11 @@ securityContext:
   runAsUser: 1000
   fsGroup: 2000
 
-
-# Liveness and readiness probes - Optimized for production
+# Liveness and readiness probes - Temporarily using root endpoint
 probes:
   livenessProbe:
     enabled: true
-    path: /health
+    path: /
     port: 8080
     initialDelaySeconds: 60
     periodSeconds: 30
@@ -67,7 +66,7 @@ probes:
     failureThreshold: 3
   readinessProbe:
     enabled: true
-    path: /health
+    path: /
     port: 8080
     initialDelaySeconds: 10
     periodSeconds: 15
