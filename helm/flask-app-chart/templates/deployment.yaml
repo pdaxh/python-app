@@ -13,10 +13,13 @@ spec:
     metadata:
       labels:
         {{- include "flask-app.selectorLabels" . | nindent 8 }}
-      {{- with .Values.pod.annotations }}
       annotations:
+        {{- with .Values.pod.annotations }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
+        # ArgoCD health check optimization
+        argocd.argoproj.io/healthcheck-path: /health
+        argocd.argoproj.io/healthcheck-timeout: 5s
     spec:
       {{- with .Values.securityContext }}
       securityContext:
@@ -37,6 +40,8 @@ spec:
               port: {{ .Values.probes.livenessProbe.port }}
             initialDelaySeconds: {{ .Values.probes.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.livenessProbe.failureThreshold }}
           {{- end }}
           {{- if .Values.probes.readinessProbe.enabled }}
           readinessProbe:
@@ -45,6 +50,8 @@ spec:
               port: {{ .Values.probes.readinessProbe.port }}
             initialDelaySeconds: {{ .Values.probes.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.probes.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readinessProbe.failureThreshold }}
           {{- end }}
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}

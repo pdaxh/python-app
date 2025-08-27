@@ -12,6 +12,11 @@ def hello_world():
 def hello():
     return {'message': 'Hello World!'}
 
+@app.route('/health')
+def health_check():
+    """Lightweight health check endpoint for Kubernetes probes"""
+    return {'status': 'healthy'}, 200
+
 @app.route('/datetime')
 def get_datetime():
     now = datetime.now()
