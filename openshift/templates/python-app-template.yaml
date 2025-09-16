@@ -1,0 +1,276 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: python-app-template
+  namespace: daaxh25-dev
+  annotations:
+    description: "Python Flask application template with ConfigMap, Deployment, Service, and Route"
+    iconClass: "icon-python"
+    tags: "python,flask,web"
+    openshift.io/display-name: "Python Flask Application"
+    openshift.io/documentation-url: "https://flask.palletsprojects.com/"
+    openshift.io/long-description: "This template creates a Python Flask web application with all necessary OpenShift resources"
+    openshift.io/provider-display-name: "OpenShift"
+    openshift.io/support-url: "https://github.com/pdaxh/python-app"
+  labels:
+    app.kubernetes.io/name: python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: template
+    template: python-app-template
+
+parameters:
+  - name: APPLICATION_NAME
+    displayName: "Application Name"
+    description: "The name of the application"
+    value: "python-app"
+    required: true
+
+  - name: NAMESPACE
+    displayName: "Namespace"
+    description: "The namespace to deploy the application"
+    value: "daaxh25-dev"
+    required: true
+
+  - name: IMAGE_NAME
+    displayName: "Image Name"
+    description: "The full image name including registry and tag"
+    value: "image-registry.openshift-image-registry.svc:5000/daaxh25-dev/python-app-pipeline:latest"
+    required: true
+
+  - name: REPLICAS
+    displayName: "Number of Replicas"
+    description: "Number of application replicas to deploy"
+    value: "1"
+    required: true
+
+  - name: CPU_REQUEST
+    displayName: "CPU Request"
+    description: "CPU request for the application container"
+    value: "50m"
+    required: true
+
+  - name: CPU_LIMIT
+    displayName: "CPU Limit"
+    description: "CPU limit for the application container"
+    value: "100m"
+    required: true
+
+  - name: MEMORY_REQUEST
+    displayName: "Memory Request"
+    description: "Memory request for the application container"
+    value: "64Mi"
+    required: true
+
+  - name: MEMORY_LIMIT
+    displayName: "Memory Limit"
+    description: "Memory limit for the application container"
+    value: "128Mi"
+    required: true
+
+  - name: FLASK_APP
+    displayName: "Flask Application File"
+    description: "The Flask application file name"
+    value: "app.py"
+    required: true
+
+  - name: FLASK_ENV
+    displayName: "Flask Environment"
+    description: "The Flask environment (development/production)"
+    value: "production"
+    required: true
+
+  - name: FLASK_RUN_HOST
+    displayName: "Flask Host"
+    description: "The host to bind Flask to"
+    value: "0.0.0.0"
+    required: true
+
+  - name: FLASK_RUN_PORT
+    displayName: "Flask Port"
+    description: "The port to bind Flask to"
+    value: "8080"
+    required: true
+
+  - name: LOG_LEVEL
+    displayName: "Log Level"
+    description: "Application log level"
+    value: "INFO"
+    required: true
+
+  - name: ROUTE_HOST
+    displayName: "Route Host"
+    description: "The hostname for the route (leave empty for auto-generation)"
+    value: ""
+    required: false
+
+  - name: ROUTE_TLS_TERMINATION
+    displayName: "TLS Termination"
+    description: "TLS termination type for the route"
+    value: "edge"
+    required: false
+
+  - name: HEALTH_CHECK_PATH
+    displayName: "Health Check Path"
+    description: "The path for health checks"
+    value: "/health"
+    required: true
+
+  - name: READINESS_CHECK_PATH
+    displayName: "Readiness Check Path"
+    description: "The path for readiness checks"
+    value: "/health"
+    required: true
+
+  - name: APP_VERSION
+    displayName: "Application Version"
+    description: "The version of the application"
+    value: "1.0.0"
+    required: true
+
+  - name: APP_DESCRIPTION
+    displayName: "Application Description"
+    description: "Description of the application"
+    value: "Python Flask Web Application"
+    required: true
+
+objects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: "${APPLICATION_NAME}-config"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        app.kubernetes.io/name: "${APPLICATION_NAME}"
+        app.kubernetes.io/version: "${APP_VERSION}"
+        app.kubernetes.io/component: backend
+        template: python-app-template
+    data:
+      FLASK_APP: "${FLASK_APP}"
+      FLASK_ENV: "${FLASK_ENV}"
+      FLASK_RUN_HOST: "${FLASK_RUN_HOST}"
+      FLASK_RUN_PORT: "${FLASK_RUN_PORT}"
+      LOG_LEVEL: "${LOG_LEVEL}"
+      APP_NAME: "${APPLICATION_NAME}"
+      APP_VERSION: "${APP_VERSION}"
+      APP_DESCRIPTION: "${APP_DESCRIPTION}"
+
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: "${APPLICATION_NAME}"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        app.kubernetes.io/name: "${APPLICATION_NAME}"
+        app.kubernetes.io/version: "${APP_VERSION}"
+        app.kubernetes.io/component: backend
+        template: python-app-template
+      annotations:
+        deployment.kubernetes.io/revision: "1"
+    spec:
+      replicas: ${REPLICAS}
+      selector:
+        matchLabels:
+          app: "${APPLICATION_NAME}"
+      template:
+        metadata:
+          labels:
+            app: "${APPLICATION_NAME}"
+            app.kubernetes.io/name: "${APPLICATION_NAME}"
+            app.kubernetes.io/version: "${APP_VERSION}"
+            app.kubernetes.io/component: backend
+        spec:
+          containers:
+          - name: python-app
+            image: "${IMAGE_NAME}"
+            ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            envFrom:
+            - configMapRef:
+                name: "${APPLICATION_NAME}-config"
+            resources:
+              requests:
+                memory: "${MEMORY_REQUEST}"
+                cpu: "${CPU_REQUEST}"
+              limits:
+                memory: "${MEMORY_LIMIT}"
+                cpu: "${CPU_LIMIT}"
+            livenessProbe:
+              httpGet:
+                path: "${HEALTH_CHECK_PATH}"
+                port: 8080
+              initialDelaySeconds: 30
+              periodSeconds: 10
+              timeoutSeconds: 5
+              successThreshold: 1
+              failureThreshold: 3
+            readinessProbe:
+              httpGet:
+                path: "${READINESS_CHECK_PATH}"
+                port: 8080
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              timeoutSeconds: 3
+              successThreshold: 1
+              failureThreshold: 3
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities:
+                drop:
+                - ALL
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: "${APPLICATION_NAME}"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        app.kubernetes.io/name: "${APPLICATION_NAME}"
+        app.kubernetes.io/version: "${APP_VERSION}"
+        app.kubernetes.io/component: backend
+        template: python-app-template
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    spec:
+      type: ClusterIP
+      ports:
+      - name: http
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        app: "${APPLICATION_NAME}"
+      sessionAffinity: None
+
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: "${APPLICATION_NAME}-route"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        app.kubernetes.io/name: "${APPLICATION_NAME}"
+        app.kubernetes.io/version: "${APP_VERSION}"
+        app.kubernetes.io/component: backend
+        template: python-app-template
+      annotations:
+        haproxy.router.openshift.io/timeout: "60s"
+        haproxy.router.openshift.io/rate-limit-connections: "true"
+        haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "10"
+    spec:
+      host: "${ROUTE_HOST}"
+      port:
+        targetPort: http
+      to:
+        kind: Service
+        name: "${APPLICATION_NAME}"
+        weight: 100
+      wildcardPolicy: None
+      tls:
+        termination: "${ROUTE_TLS_TERMINATION}"
+        insecureEdgeTerminationPolicy: Redirect

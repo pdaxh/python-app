@@ -1,0 +1,118 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: python-app-simple
+  namespace: daaxh25-dev
+  annotations:
+    description: "Simple Python Flask application template"
+    iconClass: "icon-python"
+    tags: "python,flask,web,simple"
+    openshift.io/display-name: "Python Flask App (Simple)"
+  labels:
+    app.kubernetes.io/name: python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: template
+    template: python-app-simple
+
+parameters:
+  - name: APPLICATION_NAME
+    displayName: "Application Name"
+    description: "The name of the application"
+    value: "python-app"
+    required: true
+
+  - name: NAMESPACE
+    displayName: "Namespace"
+    description: "The namespace to deploy the application"
+    value: "daaxh25-dev"
+    required: true
+
+  - name: IMAGE_NAME
+    displayName: "Image Name"
+    description: "The full image name including registry and tag"
+    value: "image-registry.openshift-image-registry.svc:5000/daaxh25-dev/python-app-pipeline:latest"
+    required: true
+
+objects:
+  - apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: "${APPLICATION_NAME}-config"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        template: python-app-simple
+    data:
+      FLASK_APP: "app.py"
+      FLASK_ENV: "production"
+      FLASK_RUN_HOST: "0.0.0.0"
+      FLASK_RUN_PORT: "8080"
+
+  - apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: "${APPLICATION_NAME}"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        template: python-app-simple
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: "${APPLICATION_NAME}"
+      template:
+        metadata:
+          labels:
+            app: "${APPLICATION_NAME}"
+        spec:
+          containers:
+          - name: python-app
+            image: "${IMAGE_NAME}"
+            ports:
+            - containerPort: 8080
+              name: http
+            envFrom:
+            - configMapRef:
+                name: "${APPLICATION_NAME}-config"
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "50m"
+              limits:
+                memory: "128Mi"
+                cpu: "100m"
+
+  - apiVersion: v1
+    kind: Service
+    metadata:
+      name: "${APPLICATION_NAME}"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        template: python-app-simple
+    spec:
+      type: ClusterIP
+      ports:
+      - name: http
+        port: 8080
+        protocol: TCP
+        targetPort: 8080
+      selector:
+        app: "${APPLICATION_NAME}"
+
+  - apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: "${APPLICATION_NAME}-route"
+      namespace: "${NAMESPACE}"
+      labels:
+        app: "${APPLICATION_NAME}"
+        template: python-app-simple
+    spec:
+      port:
+        targetPort: http
+      to:
+        kind: Service
+        name: "${APPLICATION_NAME}"
+        weight: 100
