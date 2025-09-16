@@ -169,7 +169,7 @@ objects:
       annotations:
         deployment.kubernetes.io/revision: "1"
     spec:
-      replicas: ${REPLICAS}
+      replicas: 1
       selector:
         matchLabels:
           app: "${APPLICATION_NAME}"

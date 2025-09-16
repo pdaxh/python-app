@@ -258,7 +258,6 @@ deploy_template() {
         -p APPLICATION_NAME="$APPLICATION_NAME" \
         -p NAMESPACE="$NAMESPACE" \
         -p IMAGE_NAME="$IMAGE_NAME" \
-        -p REPLICAS="$REPLICAS" \
         -p CPU_REQUEST="$CPU_REQUEST" \
         -p CPU_LIMIT="$CPU_LIMIT" \
         -p MEMORY_REQUEST="$MEMORY_REQUEST" \
@@ -274,6 +273,12 @@ deploy_template() {
         -p READINESS_CHECK_PATH="$READINESS_CHECK_PATH" \
         -p APP_VERSION="$APP_VERSION" \
         -p APP_DESCRIPTION="$APP_DESCRIPTION" | oc apply -f -
+    
+    # Scale to desired replicas if different from 1
+    if [ "$REPLICAS" != "1" ]; then
+        print_info "Scaling deployment to $REPLICAS replicas..."
+        oc scale deployment "$APPLICATION_NAME" --replicas="$REPLICAS" -n "$NAMESPACE"
+    fi
     
     print_success "Template deployed successfully!"
     
