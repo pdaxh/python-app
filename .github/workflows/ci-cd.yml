@@ -130,6 +130,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
+    # Required secrets: OPENSHIFT_SERVER_URL and OPENSHIFT_TOKEN
+    # Set these in GitHub repository settings > Secrets and variables > Actions
 
     steps:
     - name: Checkout repository
@@ -148,6 +150,19 @@ jobs:
     - name: Login to OpenShift
       run: |
         echo "Logging into OpenShift..."
+        echo "Server URL: ${{ secrets.OPENSHIFT_SERVER_URL }}"
+        echo "Token: ${{ secrets.OPENSHIFT_TOKEN }}"
+        
+        if [ -z "${{ secrets.OPENSHIFT_SERVER_URL }}" ]; then
+          echo "ERROR: OPENSHIFT_SERVER_URL secret is not set"
+          exit 1
+        fi
+        
+        if [ -z "${{ secrets.OPENSHIFT_TOKEN }}" ]; then
+          echo "ERROR: OPENSHIFT_TOKEN secret is not set"
+          exit 1
+        fi
+        
         oc login ${{ secrets.OPENSHIFT_SERVER_URL }} --token=${{ secrets.OPENSHIFT_TOKEN }} --insecure-skip-tls-verify=true
         echo "Login successful"
         oc whoami
