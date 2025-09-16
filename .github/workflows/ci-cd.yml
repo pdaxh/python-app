@@ -138,7 +138,7 @@ jobs:
     - name: Set up OpenShift CLI
       uses: redhat-actions/openshift-tools-installer@v1
       with:
-        openshift-cli-version: 'latest'
+        oc: 'latest'
 
     - name: Verify OpenShift CLI
       run: |
