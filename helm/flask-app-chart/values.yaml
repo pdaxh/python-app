@@ -37,7 +37,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: flask-app.local
+    - host: python-app.local
       paths:
         - path: /
           pathType: Prefix
