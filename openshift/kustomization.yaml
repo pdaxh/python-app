@@ -12,22 +12,8 @@ resources:
   - routes/python-app-route.yaml
   - pipelines/python-app-pipeline.yaml
 
-commonLabels:
-  app.kubernetes.io/name: python-app
-  app.kubernetes.io/version: "1.0.0"
-  app.kubernetes.io/managed-by: kustomize
-
-patchesStrategicMerge:
-  - |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: python-app-tekton
-    spec:
-      template:
-        spec:
-          containers:
-          - name: python-app
-            envFrom:
-            - configMapRef:
-                name: python-app-config
+labels:
+  - pairs:
+      app.kubernetes.io/name: python-app
+      app.kubernetes.io/version: "1.0.0"
+      app.kubernetes.io/managed-by: kustomize

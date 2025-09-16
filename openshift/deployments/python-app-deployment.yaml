@@ -30,15 +30,9 @@ spec:
         - containerPort: 8080
           name: http
           protocol: TCP
-        env:
-        - name: FLASK_APP
-          value: "app.py"
-        - name: FLASK_ENV
-          value: "production"
-        - name: FLASK_RUN_HOST
-          value: "0.0.0.0"
-        - name: FLASK_RUN_PORT
-          value: "8080"
+        envFrom:
+        - configMapRef:
+            name: python-app-config
         resources:
           requests:
             memory: "64Mi"
@@ -59,14 +53,8 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
-          runAsNonRoot: true
-          runAsUser: 1001
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: false
           capabilities:
             drop:
             - ALL
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1001
-        fsGroup: 2000
