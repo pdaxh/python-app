@@ -1,0 +1,23 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: python-app-tekton-route
+  namespace: daaxh25-dev
+  labels:
+    app: python-app-tekton
+    app.kubernetes.io/name: python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: backend
+  annotations:
+    haproxy.router.openshift.io/timeout: "60s"
+    haproxy.router.openshift.io/rate-limit-connections: "true"
+    haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp: "10"
+spec:
+  host: python-app-tekton-route-daaxh25-dev.apps.rm1.0a51.p1.openshiftapps.com
+  port:
+    targetPort: http
+  to:
+    kind: Service
+    name: python-app-tekton
+    weight: 100
+  wildcardPolicy: None

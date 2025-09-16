@@ -1,0 +1,98 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: python-app-pipeline
+  namespace: daaxh25-dev
+  labels:
+    app.kubernetes.io/name: python-app
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: pipeline
+spec:
+  params:
+    - name: IMAGE_NAME
+      type: string
+      default: "image-registry.openshift-image-registry.svc:5000/daaxh25-dev/python-app-pipeline:latest"
+    - name: GIT_REPO
+      type: string
+      default: "https://github.com/pdaxh/python-app.git"
+    - name: GIT_REVISION
+      type: string
+      default: "main"
+    - name: NAMESPACE
+      type: string
+      default: "daaxh25-dev"
+  workspaces:
+    - name: workspace
+  tasks:
+    - name: fetch-repository
+      taskRef:
+        resolver: cluster
+        params:
+        - name: kind
+          value: task
+        - name: name
+          value: git-clone
+        - name: namespace
+          value: openshift-pipelines
+      workspaces:
+        - name: output
+          workspace: workspace
+      params:
+        - name: URL
+          value: $(params.GIT_REPO)
+        - name: REVISION
+          value: $(params.GIT_REVISION)
+        - name: SUBDIRECTORY
+          value: ""
+        - name: DELETE_EXISTING
+          value: "true"
+
+    - name: build
+      taskRef:
+        resolver: cluster
+        params:
+        - name: kind
+          value: task
+        - name: name
+          value: s2i-python
+        - name: namespace
+          value: openshift-pipelines
+      runAfter:
+        - fetch-repository
+      workspaces:
+        - name: source
+          workspace: workspace
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE_NAME)
+        - name: TLS_VERIFY
+          value: "false"
+        - name: CONTEXT_DIR
+          value: "src"
+
+    - name: deploy
+      taskRef:
+        resolver: cluster
+        params:
+        - name: kind
+          value: task
+        - name: name
+          value: openshift-client
+        - name: namespace
+          value: openshift-pipelines
+      runAfter:
+        - build
+      params:
+      - name: SCRIPT
+        value: |
+          # Apply all OpenShift resources
+          oc apply -f openshift/deployments/
+          oc apply -f openshift/services/
+          oc apply -f openshift/routes/
+          
+          # Wait for deployment to be ready
+          oc rollout status deployment/python-app-tekton -n $(params.NAMESPACE) --timeout=300s
+          
+          # Get the application URL
+          ROUTE_URL=$(oc get route python-app-tekton-route -n $(params.NAMESPACE) -o jsonpath='{.spec.host}')
+          echo "Application deployed at: http://$ROUTE_URL"
