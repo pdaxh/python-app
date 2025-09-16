@@ -2,7 +2,7 @@
 
 A production-ready Flask API that provides Hello World and date/time endpoints, fully containerized with Docker and deployable to Kubernetes.
 
-## 🚀 Features
+## Features
 
 - **Hello World endpoints** (`/`, `/hello`)
 - **Date and time information** (`/datetime`, `/time`, `/date`)
@@ -11,7 +11,7 @@ A production-ready Flask API that provides Hello World and date/time endpoints, 
 - **Ingress configuration** for clean URL routing
 - **Production-ready** structure and configuration
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 python-app/
@@ -31,7 +31,7 @@ python-app/
 └── README.md              # This file
 ```
 
-## 🛠️ API Endpoints
+## API Endpoints
 
 ### Hello World
 - `GET /` - Returns Hello World message
@@ -42,14 +42,14 @@ python-app/
 - `GET /time` - Current time only
 - `GET /date` - Current date with day and month names
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Python 3.11+**
 - **Docker** with Docker Compose
 - **Kubernetes** (minikube for local development)
 - **kubectl** command-line tool
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Local Development
 
@@ -125,7 +125,7 @@ curl -H "Host: flask-app.local" http://localhost:8080/time
 curl -H "Host: flask-app.local" http://localhost:8080/date
 ```
 
-## 🐳 Docker Commands
+## Docker Commands
 
 ```bash
 # Build image
@@ -139,7 +139,7 @@ docker tag danielaxhammar/flask-app:v2 your-registry/flask-app:v2
 docker push your-registry/flask-app:v2
 ```
 
-## ☸️ Kubernetes Commands
+## Kubernetes Commands
 
 ```bash
 # Deploy
@@ -158,7 +158,7 @@ make clean
 kubectl delete -f k8s/
 ```
 
-## 📊 API Response Examples
+## API Response Examples
 
 ### Hello World
 ```json
@@ -194,7 +194,7 @@ kubectl delete -f k8s/
 }
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 - `FLASK_APP=app.py` - Flask application entry point
@@ -207,7 +207,7 @@ kubectl delete -f k8s/
 - **CPU**: 50m request, 100m limit
 - **Replicas**: 1 (configurable in deployment.yaml)
 
-## 🚀 Deployment Options
+## Deployment Options
 
 ### 1. **Local Development**
 - Direct Python execution
@@ -228,7 +228,7 @@ kubectl delete -f k8s/
 - SSL/TLS termination
 - Auto-scaling capabilities
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Test all endpoints
@@ -241,7 +241,7 @@ curl -H "Host: flask-app.local" http://localhost:8080/time
 curl -H "Host: flask-app.local" http://localhost:8080/date
 ```
 
-## 📝 Makefile Commands
+## Makefile Commands
 
 ```bash
 make build    # Build Docker image
@@ -251,7 +251,7 @@ make test     # Test all endpoints
 make help     # Show available commands
 ```
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -284,7 +284,7 @@ kubectl get endpoints flask-app
 kubectl describe ingress flask-app-ingress
 ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -292,11 +292,11 @@ kubectl describe ingress flask-app-ingress
 4. Add tests if applicable
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Flask framework for the web framework
 - Kubernetes for container orchestration
@@ -305,4 +305,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-**Happy coding! 🚀🐳☸️**
+**Happy coding!**

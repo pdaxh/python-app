@@ -6,7 +6,7 @@ CHART_NAME="flask-app"
 RELEASE_NAME="flask-app-$(date +%s)"
 NAMESPACE="tutorial"
 
-echo "🚀 Flask App Helm Deployment Script"
+echo " Flask App Helm Deployment Script"
 echo "=================================="
 
 # Function to show usage
@@ -25,69 +25,69 @@ show_usage() {
 
 # Function to install the chart
 install_chart() {
-    echo "📦 Installing Flask app chart..."
+    echo " Installing Flask app chart..."
     helm install $RELEASE_NAME ./flask-app-chart \
         --namespace $NAMESPACE \
         --create-namespace \
         --wait \
         --timeout 5m
     
-    echo "✅ Installation complete!"
-    echo "🔍 Check status with: $0 status"
-    echo "🧪 Test endpoints with: $0 test"
+    echo "SUCCESS: Installation complete!"
+    echo " Check status with: $0 status"
+    echo " Test endpoints with: $0 test"
 }
 
 # Function to upgrade the chart
 upgrade_chart() {
-    echo "🔄 Upgrading Flask app chart..."
+    echo " Upgrading Flask app chart..."
     helm upgrade $RELEASE_NAME ./flask-app-chart \
         --namespace $NAMESPACE \
         --wait \
         --timeout 5m
     
-    echo "✅ Upgrade complete!"
+    echo "SUCCESS: Upgrade complete!"
 }
 
 # Function to uninstall the chart
 uninstall_chart() {
-    echo "🗑️  Uninstalling Flask app..."
+    echo "  Uninstalling Flask app..."
     
     # Auto-detect release name if not set
     if [ -z "$RELEASE_NAME" ]; then
         RELEASE_NAME=$(helm list -n $NAMESPACE --short | grep flask-app | head -1)
         if [ -z "$RELEASE_NAME" ]; then
-            echo "❌ No Flask app release found in namespace $NAMESPACE"
+            echo "ERROR: No Flask app release found in namespace $NAMESPACE"
             return 1
         fi
-        echo "🔍 Auto-detected release for uninstall: $RELEASE_NAME"
+        echo " Auto-detected release for uninstall: $RELEASE_NAME"
     fi
     
     helm uninstall $RELEASE_NAME --namespace $NAMESPACE
     
-    echo "✅ Uninstallation complete!"
+    echo "SUCCESS: Uninstallation complete!"
 }
 
 # Function to show status
 show_status() {
-    echo "📊 Deployment Status:"
+    echo " Deployment Status:"
     echo "====================="
     
     echo ""
-    echo "🔍 Helm Release:"
+    echo " Helm Release:"
     helm list --namespace $NAMESPACE | grep $RELEASE_NAME || echo "No release found"
     
     echo ""
-    echo "🐳 Kubernetes Resources:"
+    echo " Kubernetes Resources:"
     kubectl get deployment,service,ingress -l app.kubernetes.io/instance=$RELEASE_NAME 2>/dev/null || echo "No resources found"
     
     echo ""
-    echo "📝 Pods:"
+    echo " Pods:"
     kubectl get pods -l app.kubernetes.io/instance=$RELEASE_NAME 2>/dev/null || echo "No pods found"
 }
 
 # Function to show logs
 show_logs() {
-    echo "📝 Application Logs:"
+    echo " Application Logs:"
     echo "===================="
     
     POD_NAME=$(kubectl get pods -l app.kubernetes.io/instance=$RELEASE_NAME -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
@@ -101,18 +101,18 @@ show_logs() {
 
 # Function to test endpoints
 test_endpoints() {
-    echo "🧪 Testing Endpoints:"
+    echo " Testing Endpoints:"
     echo "===================="
     
     # Auto-detect release name if not set
     if [ -z "$RELEASE_NAME" ]; then
         RELEASE_NAME=$(helm list -n $NAMESPACE --short | grep flask-app | head -1)
         if [ -z "$RELEASE_NAME" ]; then
-            echo "❌ No Flask app release found in namespace $NAMESPACE"
-            echo "💡 Try running: make helm-install"
+            echo "ERROR: No Flask app release found in namespace $NAMESPACE"
+            echo "INFO: Try running: make helm-install"
             return 1
         fi
-        echo "🔍 Auto-detected release: $RELEASE_NAME"
+        echo " Auto-detected release: $RELEASE_NAME"
     fi
     
     # Check if Ingress is available
@@ -124,7 +124,7 @@ test_endpoints() {
     else
         echo "🔌 Ingress not ready for external IP (normal for minikube)."
         echo ""
-        echo "💡 For local testing, run this in another terminal:"
+        echo "INFO: For local testing, run this in another terminal:"
         echo "   kubectl port-forward -n ingress-nginx service/ingress-nginx-controller 8080:80"
         echo ""
         echo "Then test with:"
@@ -133,7 +133,7 @@ test_endpoints() {
         echo "   curl -H 'Host: flask-app.local' http://localhost:8080/time"
         echo "   curl -H 'Host: flask-app.local' http://localhost:8080/date"
         echo ""
-        echo "✅ Your Flask app is running and ready for testing!"
+        echo "SUCCESS: Your Flask app is running and ready for testing!"
     fi
 }
 
