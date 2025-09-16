@@ -140,11 +140,17 @@ jobs:
       with:
         openshift-cli-version: 'latest'
 
+    - name: Verify OpenShift CLI
+      run: |
+        oc version --client
+        echo "OpenShift CLI installed successfully"
+
     - name: Login to OpenShift
-      uses: redhat-actions/openshift-login@v1
-      with:
-        openshift_server_url: ${{ secrets.OPENSHIFT_SERVER_URL }}
-        openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      run: |
+        echo "Logging into OpenShift..."
+        oc login ${{ secrets.OPENSHIFT_SERVER_URL }} --token=${{ secrets.OPENSHIFT_TOKEN }} --insecure-skip-tls-verify=true
+        echo "Login successful"
+        oc whoami
 
     - name: Deploy to OpenShift
       run: |
@@ -170,7 +176,7 @@ jobs:
             spec:
               containers:
               - name: python-app
-                image: image-registry.openshift-image-registry.svc:5000/daaxh25-dev/python-app-git:latest
+                image: image-registry.openshift-image-registry.svc:5000/daaxh25-dev/python-app-pipeline:latest
                 ports:
                 - containerPort: 8080
                 command: ["/bin/bash"]
