@@ -13,7 +13,7 @@ metadata:
     - gitops
   annotations:
     backstage.io/managed-by-location: file:./catalog-info.yaml
-    backstage.io/techdocs-ref: dir:.
+    backstage.io/techdocs-ref: dir:docs
     github.com/project-slug: pdaxh/python-app
     argoproj.io/instance: python-app
 spec:
