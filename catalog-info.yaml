@@ -3,21 +3,23 @@ kind: Component
 metadata:
   name: python-app
   title: Python Flask App
-  description: A simple Flask web application with health checks and Kubernetes deployment
+  description: A production-ready Flask API with health checks and Kubernetes deployment via ArgoCD
   tags:
     - python
     - flask
     - web
     - api
     - kubernetes
+    - gitops
   annotations:
     backstage.io/managed-by-location: file:./catalog-info.yaml
     backstage.io/techdocs-ref: dir:.
     github.com/project-slug: pdaxh/python-app
+    argoproj.io/instance: python-app
 spec:
   type: service
   lifecycle: production
-  owner: team-ulp
+  owner: user:default/user
   system: ulp-platform
   providesApis:
     - python-app-api
@@ -25,12 +27,15 @@ spec:
     - url: https://github.com/pdaxh/python-app
       title: Source Code
       icon: github
+      type: sourcecode
     - url: http://localhost:8080
       title: Application
       icon: web
+      type: website
     - url: http://localhost:8080/health
       title: Health Check
       icon: health
+      type: health
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
@@ -55,15 +60,22 @@ spec:
     info:
       title: Python App API
       version: 1.0.0
-      description: A simple Flask API with health checks
+      description: A production-ready Flask API with health checks, date/time endpoints, and Kubernetes deployment
+      contact:
+        name: ULP Platform Team
     servers:
       - url: http://localhost:8080
         description: Development server
+      - url: http://python-app:8080
+        description: Kubernetes service (internal)
     paths:
       /:
         get:
           summary: Home endpoint
           description: Returns a welcome message
+          operationId: getHome
+          tags:
+            - General
           responses:
             '200':
               description: Welcome message
@@ -74,11 +86,32 @@ spec:
                     properties:
                       message:
                         type: string
-                        example: "Hello from Python App!"
+                        example: "Hello World!"
+      /hello:
+        get:
+          summary: Hello endpoint
+          description: Returns a hello message
+          operationId: getHello
+          tags:
+            - General
+          responses:
+            '200':
+              description: Hello message
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Hello World!"
       /health:
         get:
           summary: Health check endpoint
-          description: Returns the health status of the application
+          description: Lightweight health check endpoint for Kubernetes probes
+          operationId: getHealth
+          tags:
+            - Health
           responses:
             '200':
               description: Application is healthy
@@ -90,5 +123,80 @@ spec:
                       status:
                         type: string
                         example: "healthy"
+      /datetime:
+        get:
+          summary: Get current date and time
+          description: Returns current date, time, datetime, and timestamp
+          operationId: getDateTime
+          tags:
+            - Date/Time
+          responses:
+            '200':
+              description: Current date and time information
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      date:
+                        type: string
+                        format: date
+                        example: "2024-01-15"
+                      time:
+                        type: string
+                        example: "14:30:25"
+                      datetime:
+                        type: string
+                        example: "2024-01-15 14:30:25"
+                      timestamp:
+                        type: number
+                        format: float
+                        example: 1705327825.123456
+      /time:
+        get:
+          summary: Get current time
+          description: Returns current time and timezone
+          operationId: getTime
+          tags:
+            - Date/Time
+          responses:
+            '200':
+              description: Current time information
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      current_time:
+                        type: string
+                        example: "14:30:25"
+                      timezone:
+                        type: string
+                        example: "local"
+      /date:
+        get:
+          summary: Get current date
+          description: Returns current date with day of week and month name
+          operationId: getDate
+          tags:
+            - Date/Time
+          responses:
+            '200':
+              description: Current date information
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      current_date:
+                        type: string
+                        format: date
+                        example: "2024-01-15"
+                      day_of_week:
+                        type: string
+                        example: "Monday"
+                      month:
+                        type: string
+                        example: "January"
 
 
