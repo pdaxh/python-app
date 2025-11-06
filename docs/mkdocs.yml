@@ -1,0 +1,28 @@
+site_name: Python Flask App Documentation
+site_description: Documentation for the Python Flask API application
+site_author: ULP Platform Team
+
+repo_url: https://github.com/pdaxh/python-app
+repo_name: pdaxh/python-app
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api-reference.md
+  - Deployment: deployment.md
+  - Architecture: architecture.md
+  - Troubleshooting: troubleshooting.md
+
+plugins:
+  - techdocs-core
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+
